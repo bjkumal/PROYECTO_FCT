@@ -37,6 +37,13 @@ interface Estudiante {
 interface Empresa {
   id: string
   nombre: string
+  modalidad?: string
+}
+
+interface CicloFormativo {
+  id: string
+  nombre: string
+  modalidad?: string
 }
 
 export function AsignacionCreateButton() {
@@ -44,8 +51,11 @@ export function AsignacionCreateButton() {
   const [loading, setLoading] = useState(false)
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([])
   const [empresas, setEmpresas] = useState<Empresa[]>([])
+  const [allEmpresas, setAllEmpresas] = useState<Empresa[]>([])
+  const [ciclos, setCiclos] = useState<CicloFormativo[]>([])
   const { toast } = useToast()
   const [error, setError] = useState<string | null>(null)
+  const [cicloSeleccionado, setCicloSeleccionado] = useState<CicloFormativo | null>(null)
 
   const [formData, setFormData] = useState({
     estudianteId: "",
@@ -75,8 +85,17 @@ export function AsignacionCreateButton() {
           ...(doc.data() as Omit<Empresa, "id">),
         }))
 
+        // Fetch ciclos formativos
+        const ciclosSnapshot = await getDocs(collection(db, "ciclosFormativos"))
+        const ciclosData = ciclosSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<CicloFormativo, "id">),
+        }))
+
         setEstudiantes(estudiantesData)
-        setEmpresas(empresasData)
+        setAllEmpresas(empresasData)
+        setEmpresas(empresasData) // Inicialmente mostramos todas las empresas
+        setCiclos(ciclosData)
       } catch (error) {
         console.error("Error fetching data:", error)
       }
@@ -101,8 +120,47 @@ export function AsignacionCreateButton() {
     }
   }, [fechaInicio, fechaFin])
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = async (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Si se selecciona un estudiante, obtener su ciclo formativo y filtrar empresas
+    if (name === "estudianteId") {
+      try {
+        const estudiante = estudiantes.find((e) => e.id === value)
+
+        if (estudiante && estudiante.cicloFormativoId) {
+          const cicloDoc = await getDoc(doc(db, "ciclosFormativos", estudiante.cicloFormativoId))
+
+          if (cicloDoc.exists()) {
+            const cicloData = cicloDoc.data() as CicloFormativo
+            setCicloSeleccionado({
+              id: cicloDoc.id,
+              ...cicloData,
+            })
+
+            // Filtrar empresas según la modalidad del ciclo
+            if (cicloData.modalidad === "online") {
+              // Para ciclos online, solo mostrar empresas online
+              const empresasFiltradas = allEmpresas.filter((empresa) => empresa.modalidad === "online")
+              setEmpresas(empresasFiltradas)
+
+              // Si hay pocas o ninguna empresa disponible, mostrar una alerta
+              if (empresasFiltradas.length === 0) {
+                setError("No hay empresas online disponibles para este ciclo formativo")
+              } else {
+                setError(null)
+              }
+            } else {
+              // Para ciclos presenciales, mostrar todas las empresas
+              setEmpresas(allEmpresas)
+              setError(null)
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener ciclo formativo:", error)
+      }
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,6 +215,13 @@ export function AsignacionCreateButton() {
         throw new Error("La empresa seleccionada no existe")
       }
 
+      // Verificar compatibilidad de modalidades
+      const empresaData = empresaDoc.data()
+
+      if (cicloSeleccionado && cicloSeleccionado.modalidad === "online" && empresaData.modalidad !== "online") {
+        throw new Error("No se puede asignar una empresa presencial a un ciclo online")
+      }
+
       await addDoc(collection(db, "asignaciones"), {
         ...formData,
         horas: Number.parseInt(formData.horas), // Guardar como número
@@ -179,11 +244,12 @@ export function AsignacionCreateButton() {
       setFechaInicio(undefined)
       setFechaFin(undefined)
       setError(null)
-    } catch (error) {
+      setCicloSeleccionado(null)
+    } catch (error: any) {
       console.error("Error al crear asignación:", error)
       toast({
         title: "Error",
-        description: "No se pudo crear la asignación. Inténtalo de nuevo.",
+        description: error.message || "No se pudo crear la asignación. Inténtalo de nuevo.",
         variant: "destructive",
       })
     } finally {
@@ -226,16 +292,30 @@ export function AsignacionCreateButton() {
                 </Select>
               </div>
 
+              {cicloSeleccionado && (
+                <Alert className="py-2">
+                  <AlertDescription>
+                    Ciclo formativo: <strong>{cicloSeleccionado.nombre}</strong> - Modalidad:{" "}
+                    <strong>{cicloSeleccionado.modalidad === "online" ? "Online" : "Presencial"}</strong>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="empresaId">Empresa</Label>
-                <Select value={formData.empresaId} onValueChange={(value) => handleSelectChange("empresaId", value)}>
+                <Select
+                  value={formData.empresaId}
+                  onValueChange={(value) => handleSelectChange("empresaId", value)}
+                  disabled={empresas.length === 0}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona una empresa" />
                   </SelectTrigger>
                   <SelectContent>
                     {empresas.map((empresa) => (
                       <SelectItem key={empresa.id} value={empresa.id}>
-                        {empresa.nombre}
+                        {empresa.nombre}{" "}
+                        {empresa.modalidad ? `(${empresa.modalidad === "online" ? "Online" : "Presencial"})` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

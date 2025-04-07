@@ -13,6 +13,7 @@ import { db } from "@/lib/firebase"
 import { doc, updateDoc } from "firebase/firestore"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 interface CicloFormativo {
   id: string
@@ -20,6 +21,7 @@ interface CicloFormativo {
   nivel: string
   familia: string
   duracion: string
+  modalidad?: string
 }
 
 interface CicloEditDialogProps {
@@ -29,7 +31,10 @@ interface CicloEditDialogProps {
 }
 
 export function CicloEditDialog({ ciclo, onSave, onCancel }: CicloEditDialogProps) {
-  const [formData, setFormData] = useState<CicloFormativo>(ciclo)
+  const [formData, setFormData] = useState<CicloFormativo>({
+    ...ciclo,
+    modalidad: ciclo.modalidad || "presencial", // Valor por defecto si no existe
+  })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const [error, setError] = useState<string | null>(null)
@@ -53,6 +58,10 @@ export function CicloEditDialog({ ciclo, onSave, onCancel }: CicloEditDialogProp
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleModalidadChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, modalidad: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,6 +151,24 @@ export function CicloEditDialog({ ciclo, onSave, onCancel }: CicloEditDialogProp
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Modalidad del ciclo</Label>
+              <RadioGroup value={formData.modalidad} onValueChange={handleModalidadChange} className="flex space-x-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="presencial" id="edit-ciclo-presencial" />
+                  <Label htmlFor="edit-ciclo-presencial" className="cursor-pointer">
+                    Presencial
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="online" id="edit-ciclo-online" />
+                  <Label htmlFor="edit-ciclo-online" className="cursor-pointer">
+                    Online
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
 

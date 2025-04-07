@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { db } from "@/lib/firebase"
 import { doc, updateDoc } from "firebase/firestore"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 interface Empresa {
   id: string
@@ -22,6 +23,7 @@ interface Empresa {
   contactoEmail: string
   contactoTelefono: string
   descripcion?: string
+  modalidad?: string
 }
 
 interface EmpresaEditDialogProps {
@@ -31,13 +33,20 @@ interface EmpresaEditDialogProps {
 }
 
 export function EmpresaEditDialog({ empresa, onSave, onCancel }: EmpresaEditDialogProps) {
-  const [formData, setFormData] = useState<Empresa>(empresa)
+  const [formData, setFormData] = useState<Empresa>({
+    ...empresa,
+    modalidad: empresa.modalidad || "presencial", // Valor por defecto si no existe
+  })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleModalidadChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, modalidad: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,6 +136,24 @@ export function EmpresaEditDialog({ empresa, onSave, onCancel }: EmpresaEditDial
                 value={formData.contactoTelefono}
                 onChange={handleChange}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Modalidad de prácticas</Label>
+              <RadioGroup value={formData.modalidad} onValueChange={handleModalidadChange} className="flex space-x-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="presencial" id="edit-presencial" />
+                  <Label htmlFor="edit-presencial" className="cursor-pointer">
+                    Presencial
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="online" id="edit-online" />
+                  <Label htmlFor="edit-online" className="cursor-pointer">
+                    Online
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
 

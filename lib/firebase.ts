@@ -16,9 +16,7 @@ const requiredEnvVars = [
 // Verificar si alguna variable de entorno está faltando
 const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName])
 
-if (missingEnvVars.length > 0) {
-  console.error(`Error: Faltan las siguientes variables de entorno: ${missingEnvVars.join(", ")}`)
-}
+
 
 // Configuración de Firebase con valores predeterminados para evitar errores
 const firebaseConfig = {

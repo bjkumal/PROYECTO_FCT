@@ -20,6 +20,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { db } from "@/lib/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export function CicloCreateButton() {
   const [open, setOpen] = useState(false)
@@ -32,6 +33,7 @@ export function CicloCreateButton() {
     nivel: "",
     familia: "",
     duracion: "",
+    modalidad: "presencial", // Valor por defecto: presencial
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +55,10 @@ export function CicloCreateButton() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleModalidadChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, modalidad: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,6 +91,7 @@ export function CicloCreateButton() {
         nivel: "",
         familia: "",
         duracion: "",
+        modalidad: "presencial",
       })
       setError(null)
     } catch (error) {
@@ -156,6 +163,24 @@ export function CicloCreateButton() {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Modalidad del ciclo</Label>
+                <RadioGroup value={formData.modalidad} onValueChange={handleModalidadChange} className="flex space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="presencial" id="ciclo-presencial" />
+                    <Label htmlFor="ciclo-presencial" className="cursor-pointer">
+                      Presencial
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="online" id="ciclo-online" />
+                    <Label htmlFor="ciclo-online" className="cursor-pointer">
+                      Online
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
             </div>
 

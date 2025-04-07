@@ -20,8 +20,12 @@ export default function DashboardPage() {
         </Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <RecentAssignments />
-        <CiclosOverview />
+        <div className="h-full flex">
+          <RecentAssignments />
+        </div>
+        <div className="h-full flex">
+          <CiclosOverview />
+        </div>
       </div>
     </div>
   )

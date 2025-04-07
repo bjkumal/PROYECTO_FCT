@@ -19,6 +19,7 @@ interface CicloFormativo {
   nivel: string
   familia: string
   duracion: string
+  modalidad?: string
 }
 
 export function CiclosTable() {
@@ -66,31 +67,12 @@ export function CiclosTable() {
         (ciclo) =>
           ciclo.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
           ciclo.familia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          ciclo.nivel.toLowerCase().includes(searchTerm.toLowerCase()),
+          ciclo.nivel.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (ciclo.modalidad && ciclo.modalidad.toLowerCase().includes(searchTerm.toLowerCase())),
       )
       setFilteredCiclos(filtered)
     }
   }, [searchTerm, ciclos])
-
-  const handleDelete = async (id: string) => {
-    // if (confirm("¿Estás seguro de eliminar este ciclo formativo?")) {
-    //   try {
-    //     await deleteDoc(doc(db, "ciclosFormativos", id))
-    //     setCiclos((prev) => prev.filter((ciclo) => ciclo.id !== id))
-    //     toast({
-    //       title: "Ciclo formativo eliminado",
-    //       description: "El ciclo formativo se ha eliminado correctamente.",
-    //     })
-    //   } catch (error) {
-    //     console.error("Error deleting ciclo:", error)
-    //     toast({
-    //       title: "Error",
-    //       description: "No se pudo eliminar el ciclo formativo.",
-    //       variant: "destructive",
-    //     })
-    //   }
-    // }
-  }
 
   const handleCicloUpdated = (updatedCiclo: CicloFormativo) => {
     setCiclos((prev) => prev.map((ciclo) => (ciclo.id === updatedCiclo.id ? updatedCiclo : ciclo)))
@@ -132,6 +114,7 @@ export function CiclosTable() {
               <TableHead>Nombre</TableHead>
               <TableHead>Nivel</TableHead>
               <TableHead>Familia Profesional</TableHead>
+              <TableHead>Modalidad</TableHead>
               <TableHead>Duración (horas)</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
@@ -145,6 +128,11 @@ export function CiclosTable() {
                     <Badge variant={getNivelBadgeVariant(ciclo.nivel)}>{ciclo.nivel}</Badge>
                   </TableCell>
                   <TableCell>{ciclo.familia}</TableCell>
+                  <TableCell>
+                    <Badge variant={ciclo.modalidad === "online" ? "secondary" : "default"}>
+                      {ciclo.modalidad === "online" ? "Online" : "Presencial"}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{ciclo.duracion}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -170,7 +158,7 @@ export function CiclosTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6">
+                <TableCell colSpan={6} className="text-center py-6">
                   No se encontraron ciclos formativos
                 </TableCell>
               </TableRow>

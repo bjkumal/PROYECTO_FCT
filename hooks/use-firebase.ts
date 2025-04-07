@@ -7,12 +7,13 @@ import { getAuth, type Auth } from "firebase/auth"
 
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyDyTcdYHPBFtWLlbBzLCmTrPxBiFn8uCSw",
+  authDomain: "ceac-fct-11dd6.firebaseapp.com",
+  projectId: "ceac-fct-11dd6",
+  storageBucket: "ceac-fct-11dd6.firebasestorage.app",
+  messagingSenderId: "119628552506",
+  appId: "1:119628552506:web:00236327b0fa4f6f751803",
+  measurementId: "G-RB7GCTR1K7"
 }
 
 export function useFirebase() {

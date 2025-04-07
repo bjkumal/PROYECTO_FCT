@@ -194,12 +194,6 @@ export default function LoginPage() {
               Crear usuario administrador
             </Link>
           </div>
-          <div className="text-sm text-center text-muted-foreground">
-            ¿Problemas con el inicio de sesión?{" "}
-            <Link href="/firebase-diagnostico" className="text-primary hover:underline">
-              Diagnosticar problemas
-            </Link>
-          </div>
         </CardFooter>
       </Card>
     </div>

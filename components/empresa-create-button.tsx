@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { db } from "@/lib/firebase"
 import { collection, addDoc } from "firebase/firestore"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export function EmpresaCreateButton() {
   const [open, setOpen] = useState(false)
@@ -34,11 +35,16 @@ export function EmpresaCreateButton() {
     contactoEmail: "",
     contactoTelefono: "",
     descripcion: "",
+    modalidad: "presencial", // Valor por defecto: presencial
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleModalidadChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, modalidad: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,6 +72,7 @@ export function EmpresaCreateButton() {
         contactoEmail: "",
         contactoTelefono: "",
         descripcion: "",
+        modalidad: "presencial",
       })
     } catch (error) {
       console.error("Error al crear empresa:", error)
@@ -144,6 +151,24 @@ export function EmpresaCreateButton() {
                   value={formData.contactoTelefono}
                   onChange={handleChange}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Modalidad de prácticas</Label>
+                <RadioGroup value={formData.modalidad} onValueChange={handleModalidadChange} className="flex space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="presencial" id="presencial" />
+                    <Label htmlFor="presencial" className="cursor-pointer">
+                      Presencial
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="online" id="online" />
+                    <Label htmlFor="online" className="cursor-pointer">
+                      Online
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
             </div>
 
